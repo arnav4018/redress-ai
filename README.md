@@ -1,6 +1,6 @@
 # 🇮🇳 Redress AI — AI-Based Citizen Grievance Classification System
 
-> Built for BGI Hackathon 2026 | Team: [Your Team Name]
+> Built for BGI Hackathon 2026 | Team: [Redress AI]
 
 ## 🚀 Live Demo
 🔗 [Click here to view live demo](#) ← (we'll add this after deployment)
