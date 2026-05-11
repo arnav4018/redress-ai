@@ -1,24 +1,27 @@
 # ============================================
-# FLASK BACKEND — WITH SENTIMENT ANALYSIS
+# FLASK BACKEND — PRODUCTION READY
 # ============================================
 
-from flask import Flask, render_template, request, jsonify
+import os
+import re
 import pickle
 import sqlite3
-import re
 import nltk
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from translator import detect_and_translate
 from sentiment import analyze_sentiment, get_combined_priority
 
 nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
 from nltk.corpus import stopwords
 
 app = Flask(__name__)
 
 # ============================================
-# LOAD AI MODEL
+# LOAD AI MODEL (train if not exists)
 # ============================================
+
 if not os.path.exists('model/classifier.pkl'):
     print("🤖 Model not found. Training now...")
     from startup import train_and_save
@@ -98,24 +101,14 @@ def check_urgency(text):
 # ============================================
 
 def predict_department(complaint_text):
-    # Step 1: Translate if Hindi
     translated_text, original_language = detect_and_translate(complaint_text)
-
-    # Step 2: Check urgency
     urgency = check_urgency(complaint_text + ' ' + translated_text)
-
-    # Step 3: Sentiment analysis
     sentiment_score, sentiment_label, _ = analyze_sentiment(translated_text)
-
-    # Step 4: Combined priority
     priority_level = get_combined_priority(urgency, sentiment_label)
-
-    # Step 5: Classify department
     cleaned = clean_text(translated_text)
     vectorized = vectorizer.transform([cleaned])
     department = model.predict(vectorized)[0]
     confidence = round(model.predict_proba(vectorized).max() * 100, 2)
-
     return (department, confidence, urgency,
             translated_text, original_language,
             sentiment_score, sentiment_label, priority_level)
@@ -132,39 +125,21 @@ def home():
 def dashboard():
     conn = sqlite3.connect('grievances.db')
     cursor = conn.cursor()
-
     cursor.execute('SELECT * FROM grievances ORDER BY id DESC')
     grievances = cursor.fetchall()
-
-    cursor.execute('''
-        SELECT department, COUNT(*) as count
-        FROM grievances GROUP BY department
-    ''')
+    cursor.execute('SELECT department, COUNT(*) FROM grievances GROUP BY department')
     dept_stats = cursor.fetchall()
-
-    cursor.execute('''
-        SELECT urgency, COUNT(*) as count
-        FROM grievances GROUP BY urgency
-    ''')
+    cursor.execute('SELECT urgency, COUNT(*) FROM grievances GROUP BY urgency')
     urgency_stats = cursor.fetchall()
-
     cursor.execute('SELECT COUNT(*) FROM grievances')
     total = cursor.fetchone()[0]
-
     cursor.execute("SELECT COUNT(*) FROM grievances WHERE urgency='URGENT'")
     urgent_count = cursor.fetchone()[0]
-
     cursor.execute("SELECT COUNT(*) FROM grievances WHERE status='Pending'")
     pending_count = cursor.fetchone()[0]
-
-    cursor.execute('''
-        SELECT priority_level, COUNT(*) as count
-        FROM grievances GROUP BY priority_level
-    ''')
+    cursor.execute('SELECT priority_level, COUNT(*) FROM grievances GROUP BY priority_level')
     priority_stats = cursor.fetchall()
-
     conn.close()
-
     return render_template('dashboard.html',
                            grievances=grievances,
                            dept_stats=dept_stats,
@@ -187,24 +162,16 @@ def submit_complaint():
         complaint = request.form.get('complaint', '').strip()
 
         if not all([name, phone, location, complaint]):
-            return jsonify({
-                'success': False,
-                'error': 'All fields are required!'
-            })
+            return jsonify({'success': False, 'error': 'All fields are required!'})
 
         if len(complaint) < 5:
-            return jsonify({
-                'success': False,
-                'error': 'Please describe your complaint in more detail.'
-            })
+            return jsonify({'success': False, 'error': 'Please describe your complaint in more detail.'})
 
-        # Full AI pipeline
         (department, confidence, urgency,
          translated, language,
          sentiment_score, sentiment_label,
          priority_level) = predict_department(complaint)
 
-        # Save to database
         conn = sqlite3.connect('grievances.db')
         cursor = conn.cursor()
         cursor.execute('''
@@ -218,7 +185,6 @@ def submit_complaint():
               language, department, urgency, confidence,
               sentiment_score, sentiment_label, priority_level,
               'Pending', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
-
         complaint_id = cursor.lastrowid
         conn.commit()
         conn.close()
@@ -236,58 +202,36 @@ def submit_complaint():
         })
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Something went wrong: {str(e)}'
-        })
+        return jsonify({'success': False, 'error': f'Something went wrong: {str(e)}'})
 
 @app.route('/track_complaint', methods=['POST'])
 def track_complaint():
     try:
         complaint_id = request.form.get('complaint_id', '').strip()
-
         if not complaint_id:
-            return jsonify({
-                'success': False,
-                'error': 'Please enter a complaint ID'
-            })
+            return jsonify({'success': False, 'error': 'Please enter a complaint ID'})
 
         conn = sqlite3.connect('grievances.db')
         cursor = conn.cursor()
-        cursor.execute(
-            'SELECT * FROM grievances WHERE id=?',
-            (complaint_id,)
-        )
+        cursor.execute('SELECT * FROM grievances WHERE id=?', (complaint_id,))
         g = cursor.fetchone()
         conn.close()
 
         if not g:
-            return jsonify({
-                'success': False,
-                'error': f'No complaint found with ID #{complaint_id}'
-            })
+            return jsonify({'success': False, 'error': f'No complaint found with ID #{complaint_id}'})
 
         return jsonify({
             'success': True,
-            'id': g[0],
-            'name': g[1],
-            'location': g[3],
-            'complaint': g[4],
-            'language': g[6],
-            'department': g[7],
-            'urgency': g[8],
-            'confidence': g[9],
-            'sentiment_label': g[11],
-            'priority_level': g[12],
-            'status': g[13],
+            'id': g[0], 'name': g[1], 'location': g[3],
+            'complaint': g[4], 'language': g[6],
+            'department': g[7], 'urgency': g[8],
+            'confidence': g[9], 'sentiment_label': g[11],
+            'priority_level': g[12], 'status': g[13],
             'submitted_at': g[14]
         })
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        })
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/update_status', methods=['POST'])
 def update_status():
@@ -295,10 +239,7 @@ def update_status():
     new_status = request.form.get('status')
     conn = sqlite3.connect('grievances.db')
     cursor = conn.cursor()
-    cursor.execute(
-        'UPDATE grievances SET status=? WHERE id=?',
-        (new_status, complaint_id)
-    )
+    cursor.execute('UPDATE grievances SET status=? WHERE id=?', (new_status, complaint_id))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -307,21 +248,12 @@ def update_status():
 def get_stats():
     conn = sqlite3.connect('grievances.db')
     cursor = conn.cursor()
-    cursor.execute('''
-        SELECT department, COUNT(*) as count
-        FROM grievances GROUP BY department
-    ''')
+    cursor.execute('SELECT department, COUNT(*) FROM grievances GROUP BY department')
     dept_data = dict(cursor.fetchall())
-    cursor.execute('''
-        SELECT urgency, COUNT(*) as count
-        FROM grievances GROUP BY urgency
-    ''')
+    cursor.execute('SELECT urgency, COUNT(*) FROM grievances GROUP BY urgency')
     urgency_data = dict(cursor.fetchall())
     conn.close()
-    return jsonify({
-        'departments': dept_data,
-        'urgency': urgency_data
-    })
+    return jsonify({'departments': dept_data, 'urgency': urgency_data})
 
 # ============================================
 # RUN
