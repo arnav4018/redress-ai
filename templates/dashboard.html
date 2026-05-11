@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redress AI — Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --blue-dark: #0a1628;
+            --blue-mid: #0f2d6b;
+            --blue-primary: #1a56db;
+            --blue-light: #3b82f6;
+            --blue-glow: #60a5fa;
+            --accent: #f59e0b;
+            --accent-light: #fcd34d;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow-card: 0 4px 24px rgba(10, 22, 40, 0.10);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            background: var(--gray-50);
+            color: var(--gray-700);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: var(--blue-dark);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #FF9933 0%, #ffffff 50%, #138808 100%);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-brand-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--white);
+            font-weight: 800;
+        }
+
+        .nav-brand-text span { color: var(--accent); }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-badge {
+            background: rgba(245,158,11,0.15);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: var(--accent-light);
+            font-size: 0.80rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+        }
+
+        .nav-btn {
+            background: var(--blue-primary);
+            color: white;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background: var(--blue-light); }
+
+        /* MAIN */
+        .main { padding: 28px 32px; }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--blue-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-top: 3px;
+        }
+
+        .refresh-btn {
+            background: white;
+            border: 1.5px solid var(--gray-200);
+            color: var(--gray-700);
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+
+        /* STAT CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover { transform: translateY(-2px); }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.blue { background: #eff6ff; }
+        .stat-icon.red { background: #fef2f2; }
+        .stat-icon.orange { background: #fff7ed; }
+        .stat-icon.green { background: #f0fdf4; }
+
+        .stat-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--blue-dark);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.80rem;
+            color: var(--gray-500);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+        }
+
+        /* CHARTS ROW */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 14px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--gray-200);
+        }
+
+        .chart-card-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 18px;
+        }
+
+        .chart-wrap { position: relative; height: 200px; }
+
+        /* TABLE CARD */
+        .table-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-card-header h3 {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .search-input {
+            padding: 8px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            color: var(--gray-700);
+            outline: none;
+            width: 220px;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+
+        .search-input:focus {
+            border-color: var(--blue-primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,86,219,0.08);
+        }
+
+        /* TABLE */
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+
+        thead th {
+            text-align: left;
+            padding: 11px 16px;
+            background: var(--gray-50);
+            color: var(--gray-500);
+            font-weight: 700;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--gray-200);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gray-100);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover { background: #f8faff; }
+        tbody tr:last-child { border-bottom: none; }
+
+        tbody td {
+            padding: 12px 16px;
+            color: var(--gray-700);
+            vertical-align: middle;
+        }
+
+        .complaint-text {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--gray-500);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-urgent { background: #fee2e2; color: #991b1b; }
+        .badge-normal { background: #dcfce7; color: #15803d; }
+        .badge-pending { background: #fff7ed; color: #c2410c; }
+        .badge-progress { background: #eff6ff; color: #1d4ed8; }
+        .badge-resolved { background: #dcfce7; color: #15803d; }
+
+        .dept-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #eff6ff;
+            color: var(--blue-primary);
+            white-space: nowrap;
+        }
+
+        /* STATUS SELECT */
+        .status-select {
+            padding: 5px 10px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 7px;
+            font-size: 0.84rem;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            outline: none;
+            background: white;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+
+        .status-select:focus { border-color: var(--blue-primary); }
+
+        /* NO DATA */
+        .no-data {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray-500);
+        }
+
+        .no-data .nd-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .no-data p { font-size: 0.9rem; }
+        .no-data a { color: var(--blue-primary); font-weight: 600; text-decoration: none; }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .charts-row { grid-template-columns: 1fr; }
+            .main { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a class="nav-brand" href="/">
+        <div class="nav-logo">🇮🇳</div>
+        <div class="nav-brand-text">Redress <span>AI</span></div>
+    </a>
+    <div class="nav-right">
+        <span class="nav-badge">⚙️ Admin Panel</span>
+        <a href="/" class="nav-btn">+ New Complaint</a>
+    </div>
+</nav>
+
+<div class="main">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <h1>📊 Grievance Dashboard</h1>
+            <p>Real-time overview of all citizen complaints and department analytics</p>
+        </div>
+        <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">📋</div>
+            <div>
+                <div class="stat-num">{{ total }}</div>
+                <div class="stat-label">Total Complaints</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">🚨</div>
+            <div>
+                <div class="stat-num">{{ urgent_count }}</div>
+                <div class="stat-label">Urgent Cases</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange">⏳</div>
+            <div>
+                <div class="stat-num">{{ pending_count }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-num">{{ total - pending_count }}</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-card-title">📊 Complaints by Department</div>
+            <div class="chart-wrap">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">🚨 Urgency Split</div>
+            <div class="chart-wrap">
+                <canvas id="urgencyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h3>📋 All Complaints</h3>
+            <input class="search-input" type="text"
+                   placeholder="🔍  Search by name, location, dept..."
+                   onkeyup="filterTable(this.value)">
+        </div>
+
+        {% if grievances %}
+        <div class="table-wrap">
+        <table id="complaintsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Complaint</th>
+                    <th>Department</th>
+                    <th>Urgency</th>
+                    <th>Priority</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for g in grievances %}
+                <tr>
+                    <td><strong>#{{ g[0] }}</strong></td>
+                    <td>{{ g[1] }}</td>
+                    <td>{{ g[3] }}</td>
+                    <td><div class="complaint-text" title="{{ g[4] }}">{{ g[4] }}</div></td>
+                    <td><span class="dept-badge">{{ g[7] }}</span></td>
+                    <td>
+                        {% if g[8] == 'URGENT' %}
+                            <span class="badge badge-urgent">🔴 Urgent</span>
+                        {% else %}
+                            <span class="badge badge-normal">🟢 Normal</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ g[12] }}</td>
+                    <td>{{ g[9] }}%</td>
+                    <td>
+                        <select class="status-select"
+                                onchange="updateStatus({{ g[0] }}, this.value)">
+                            <option {% if g[13] == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option {% if g[13] == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option {% if g[13] == 'Resolved' %}selected{% endif %}>Resolved</option>
+                        </select>
+                    </td>
+                    <td>{{ g[14][:10] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <div class="nd-icon">📭</div>
+            <p>No complaints yet. <a href="/">Submit the first one!</a></p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    // DEPARTMENT CHART
+    const deptStats = {{ dept_stats | tojson }};
+    new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: {
+            labels: deptStats.map(d => d[0]),
+            datasets: [{
+                data: deptStats.map(d => d[1]),
+                backgroundColor: ['#1a56db','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'],
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, font: { size: 12, family: 'DM Sans' } },
+                    grid: { color: '#f1f5f9' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 12, family: 'DM Sans' } }
+                }
+            }
+        }
+    });
+
+    // URGENCY CHART
+    const urgencyStats = {{ urgency_stats | tojson }};
+    new Chart(document.getElementById('urgencyChart'), {
+        type: 'doughnut',
+        data: {
+            labels: urgencyStats.map(u => u[0]),
+            datasets: [{
+                data: urgencyStats.map(u => u[1]),
+                backgroundColor: ['#ef4444','#10b981'],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 16, font: { size: 12, family: 'DM Sans' }, boxWidth: 12 }
+                }
+            }
+        }
+    });
+
+    // UPDATE STATUS
+    async function updateStatus(id, status) {
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('status', status);
+        await fetch('/update_status', { method: 'POST', body: formData });
+    }
+
+    // FILTER TABLE
+    function filterTable(query) {
+        const rows = document.querySelectorAll('#complaintsTable tbody tr');
+        query = query.toLowerCase();
+        rows.forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>

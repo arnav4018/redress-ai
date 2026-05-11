@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redress AI — Track Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-dark: #0a1628;
+            --blue-mid: #0f2d6b;
+            --blue-primary: #1a56db;
+            --blue-light: #3b82f6;
+            --blue-glow: #60a5fa;
+            --accent: #f59e0b;
+            --accent-light: #fcd34d;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow-blue: 0 8px 32px rgba(26, 86, 219, 0.25);
+            --shadow-card: 0 4px 24px rgba(10, 22, 40, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--blue-dark);
+            padding: 0 40px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #FF9933 0%, #ffffff 50%, #138808 100%);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-brand-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--white);
+            font-weight: 800;
+        }
+
+        .nav-brand-text span { color: var(--accent); }
+        .nav-links { display: flex; gap: 8px; }
+
+        .nav-link {
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-link.active { color: white; background: var(--blue-primary); }
+
+        .hero {
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            padding: 50px 40px 70px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(26,86,219,0.25) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.8px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--blue-glow), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p { color: rgba(255,255,255,0.6); font-size: 0.95rem; position: relative; }
+
+        .main {
+            max-width: 680px;
+            margin: -35px auto 60px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            margin-bottom: 20px;
+        }
+
+        .search-card-header {
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
+            padding: 18px 26px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-card-header h2 { color: white; font-size: 1rem; font-weight: 700; }
+        .search-body { padding: 24px 26px; }
+
+        .search-row { display: flex; gap: 10px; }
+
+        .search-row input {
+            flex: 1;
+            padding: 13px 16px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            color: var(--gray-700);
+            background: var(--gray-50);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-row input:focus {
+            border-color: var(--blue-primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,86,219,0.08);
+        }
+
+        .btn-track {
+            padding: 13px 24px;
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            transition: all 0.2s;
+            white-space: nowrap;
+            box-shadow: var(--shadow-blue);
+        }
+
+        .btn-track:hover { transform: translateY(-1px); }
+        .btn-track:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .error-box {
+            display: none;
+            margin-top: 16px;
+            padding: 13px 16px;
+            background: #fef2f2;
+            border: 1.5px solid #fecaca;
+            border-radius: 10px;
+            color: #b91c1c;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .result-card {
+            display: none;
+            background: white;
+            border-radius: 18px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card-header {
+            background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid));
+            padding: 20px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-card-header h3 {
+            font-family: 'DM Serif Display', serif;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .complaint-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--blue-primary);
+            padding: 16px 20px;
+            margin: 20px 24px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            line-height: 1.65;
+            font-style: italic;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--gray-100);
+            margin: 0 24px 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+
+        .info-item { background: white; padding: 14px 18px; }
+
+        .info-item .i-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .info-item .i-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .badge-urgent { background: #fee2e2; color: #991b1b; }
+        .badge-normal { background: #dcfce7; color: #15803d; }
+        .badge-pending { background: #fff7ed; color: #c2410c; }
+        .badge-progress { background: #eff6ff; color: #1d4ed8; }
+        .badge-resolved { background: #dcfce7; color: #15803d; }
+
+        .timeline-section { padding: 0 24px 24px; }
+
+        .timeline-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 16px;
+        }
+
+        .timeline-track {
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .timeline-track::before {
+            content: '';
+            position: absolute;
+            top: 16px; left: 16px; right: 16px;
+            height: 2px;
+            background: var(--gray-200);
+            z-index: 0;
+        }
+
+        .t-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .t-dot {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px var(--gray-200);
+        }
+
+        .t-dot.done { background: var(--success); color: white; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+        .t-dot.active { background: var(--blue-primary); color: white; box-shadow: 0 0 0 3px rgba(26,86,219,0.2); }
+
+        .t-label { font-size: 0.78rem; color: var(--gray-500); font-weight: 600; text-align: center; }
+
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .navbar { padding: 0 16px; }
+            .search-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="nav-brand" href="/">
+        <div class="nav-logo">🇮🇳</div>
+        <div class="nav-brand-text">Redress <span>AI</span></div>
+    </a>
+    <div class="nav-links">
+        <a href="/" class="nav-link">Submit</a>
+        <a href="/track" class="nav-link active">Track</a>
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Track Your <span>Complaint</span></h1>
+    <p>Enter your complaint ID to check real-time status and department assignment</p>
+</div>
+
+<div class="main">
+    <div class="search-card">
+        <div class="search-card-header">
+            <span>🔍</span>
+            <h2>Complaint Tracker</h2>
+        </div>
+        <div class="search-body">
+            <div class="search-row">
+                <input type="number" id="complaintId"
+                       placeholder="Enter your Complaint ID (e.g. 1, 2, 3...)">
+                <button class="btn-track" onclick="searchComplaint()">Track →</button>
+            </div>
+            <div class="error-box" id="errorBox"></div>
+        </div>
+    </div>
+
+    <div class="result-card" id="resultCard">
+        <div class="result-card-header">
+            <h3 id="resultTitle">Complaint #1</h3>
+            <span id="urgencyBadge"></span>
+        </div>
+
+        <div class="complaint-box" id="complaintText"></div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="i-label">👤 Submitted By</div>
+                <div class="i-value" id="nameVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">📍 Location</div>
+                <div class="i-value" id="locationVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">🏢 Department</div>
+                <div class="i-value" id="deptVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">🤖 AI Confidence</div>
+                <div class="i-value" id="confVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">🌐 Language</div>
+                <div class="i-value" id="langVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">📋 Current Status</div>
+                <div class="i-value" id="statusVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">🎯 Priority Level</div>
+                <div class="i-value" id="priorityVal"></div>
+            </div>
+            <div class="info-item">
+                <div class="i-label">📅 Submitted On</div>
+                <div class="i-value" id="dateVal"></div>
+            </div>
+        </div>
+
+        <div class="timeline-section">
+            <div class="timeline-title">📍 Progress Timeline</div>
+            <div class="timeline-track">
+                <div class="t-step">
+                    <div class="t-dot done">✓</div>
+                    <div class="t-label">Submitted</div>
+                </div>
+                <div class="t-step">
+                    <div class="t-dot" id="step2">2</div>
+                    <div class="t-label">Pending</div>
+                </div>
+                <div class="t-step">
+                    <div class="t-dot" id="step3">3</div>
+                    <div class="t-label">In Progress</div>
+                </div>
+                <div class="t-step">
+                    <div class="t-dot" id="step4">✓</div>
+                    <div class="t-label">Resolved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deptIcons = { 'Water Supply':'💧','Electricity':'⚡','Roads':'🛣️','Sanitation':'🗑️','Public Services':'🏛️' };
+
+    async function searchComplaint() {
+        const id = document.getElementById('complaintId').value.trim();
+        if (!id) { showError('Please enter a complaint ID!'); return; }
+
+        document.querySelector('.btn-track').textContent = 'Searching...';
+        document.querySelector('.btn-track').disabled = true;
+
+        const formData = new FormData();
+        formData.append('complaint_id', id);
+
+        try {
+            const res = await fetch('/track_complaint', { method: 'POST', body: formData });
+            const data = await res.json();
+            document.querySelector('.btn-track').textContent = 'Track →';
+            document.querySelector('.btn-track').disabled = false;
+            if (data.success) showResult(data);
+            else showError(data.error);
+        } catch(e) {
+            document.querySelector('.btn-track').textContent = 'Track →';
+            document.querySelector('.btn-track').disabled = false;
+            showError('Connection error. Please try again.');
+        }
+    }
+
+    function showResult(data) {
+        document.getElementById('errorBox').style.display = 'none';
+        const icon = deptIcons[data.department] || '📋';
+        document.getElementById('resultTitle').textContent = `Complaint #${data.id}`;
+        document.getElementById('complaintText').textContent = `"${data.complaint}"`;
+        document.getElementById('nameVal').textContent = data.name;
+        document.getElementById('locationVal').textContent = data.location;
+        document.getElementById('deptVal').textContent = `${icon} ${data.department}`;
+        document.getElementById('confVal').textContent = `${data.confidence}%`;
+        document.getElementById('langVal').textContent = `🌐 ${data.language}`;
+        document.getElementById('priorityVal').textContent = data.priority_level || 'N/A';
+        document.getElementById('dateVal').textContent = data.submitted_at;
+
+        document.getElementById('urgencyBadge').innerHTML = data.urgency === 'URGENT'
+            ? '<span class="badge badge-urgent">🔴 URGENT</span>'
+            : '<span class="badge badge-normal">🟢 Normal</span>';
+
+        const statusMap = {
+            'Pending': '<span class="badge badge-pending">⏳ Pending</span>',
+            'In Progress': '<span class="badge badge-progress">🔄 In Progress</span>',
+            'Resolved': '<span class="badge badge-resolved">✅ Resolved</span>'
+        };
+        document.getElementById('statusVal').innerHTML = statusMap[data.status] || data.status;
+
+        ['step2','step3','step4'].forEach(id => document.getElementById(id).className = 't-dot');
+        if (data.status === 'Pending') document.getElementById('step2').className = 't-dot active';
+        else if (data.status === 'In Progress') {
+            document.getElementById('step2').className = 't-dot done';
+            document.getElementById('step3').className = 't-dot active';
+        } else if (data.status === 'Resolved') {
+            document.getElementById('step2').className = 't-dot done';
+            document.getElementById('step3').className = 't-dot done';
+            document.getElementById('step4').className = 't-dot done';
+        }
+
+        document.getElementById('resultCard').style.display = 'block';
+    }
+
+    function showError(msg) {
+        document.getElementById('resultCard').style.display = 'none';
+        const eb = document.getElementById('errorBox');
+        eb.textContent = '❌ ' + msg;
+        eb.style.display = 'block';
+    }
+
+    document.getElementById('complaintId').addEventListener('keypress', e => {
+        if (e.key === 'Enter') searchComplaint();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redress AI — Citizen Grievance Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-dark: #0a1628;
+            --blue-mid: #0f2d6b;
+            --blue-primary: #1a56db;
+            --blue-light: #3b82f6;
+            --blue-glow: #60a5fa;
+            --accent: #f59e0b;
+            --accent-light: #fcd34d;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow-blue: 0 8px 32px rgba(26, 86, 219, 0.25);
+            --shadow-card: 0 4px 24px rgba(10, 22, 40, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            background: var(--gray-50);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ---- NAVBAR ---- */
+        .navbar {
+            background: var(--blue-dark);
+            padding: 0 40px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #FF9933 0%, #ffffff 50%, #138808 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-brand-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.2rem;
+            color: var(--white);
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .nav-brand-text span { color: var(--accent); }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: var(--blue-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* ---- HERO ---- */
+        .hero {
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 60%, #1a3a8a 100%);
+            padding: 60px 40px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(26,86,219,0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--accent-light);
+            font-size: 0.84rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.15;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--blue-glow), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: rgba(255,255,255,0.65);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 520px;
+            margin: 0 auto 30px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--white);
+        }
+
+        .hero-stat .num span { color: var(--accent); }
+
+        .hero-stat .lbl {
+            font-size: 0.80rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ---- MAIN LAYOUT ---- */
+        .main {
+            max-width: 860px;
+            margin: -40px auto 60px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ---- FORM CARD ---- */
+        .form-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+
+        .form-card-header {
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
+            padding: 22px 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-card-header .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .form-card-header h2 {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .form-card-header p {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .form-body { padding: 32px; }
+
+        /* LANGUAGE NOTE */
+        .lang-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--blue-mid);
+            font-weight: 500;
+        }
+
+        /* FORM FIELDS */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .form-group label span {
+            color: var(--danger);
+            margin-left: 2px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            color: var(--gray-700);
+            background: var(--gray-50);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--blue-primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,86,219,0.08);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        /* CHAR COUNTER */
+        .char-count {
+            font-size: 0.80rem;
+            color: var(--gray-500);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* SUBMIT BUTTON */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, var(--blue-primary), var(--blue-light));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+            box-shadow: var(--shadow-blue);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(26,86,219,0.35);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* LOADING */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            color: var(--blue-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid var(--gray-200);
+            border-top-color: var(--blue-primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESULT BOX */
+        .result-box {
+            display: none;
+            margin-top: 24px;
+            border-radius: 14px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+            border: 1.5px solid var(--gray-200);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box.success { border-color: #bbf7d0; }
+        .result-box.error { border-color: #fecaca; }
+
+        .result-header-bar {
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-box.success .result-header-bar {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .result-box.error .result-header-bar {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--gray-200);
+        }
+
+        .result-item {
+            background: white;
+            padding: 16px 18px;
+        }
+
+        .result-item .r-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 5px;
+        }
+
+        .result-item .r-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .complaint-id-bar {
+            background: #eff6ff;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--blue-mid);
+            font-weight: 500;
+        }
+
+        .complaint-id-bar strong {
+            color: var(--blue-primary);
+            font-size: 1rem;
+        }
+
+        /* PRIORITY BADGES */
+        .p-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .p-critical { background: #fee2e2; color: #991b1b; }
+        .p-high { background: #fff7ed; color: #c2410c; }
+        .p-medium { background: #fefce8; color: #a16207; }
+        .p-low { background: #f0fdf4; color: #15803d; }
+
+        /* HOW IT WORKS */
+        .how-it-works {
+            margin-top: 24px;
+            background: white;
+            border-radius: 16px;
+            padding: 24px 28px;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-card);
+        }
+
+        .how-it-works h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 18px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-num {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-light));
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .step-text {
+            font-size: 0.80rem;
+            color: var(--gray-500);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .step-arrow {
+            color: var(--gray-200);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 1.9rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .result-grid { grid-template-columns: 1fr 1fr; }
+            .steps { flex-wrap: wrap; }
+            .step-arrow { display: none; }
+            .navbar { padding: 0 16px; }
+            .hero { padding: 40px 20px 60px; }
+            .form-body { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a class="nav-brand" href="/">
+        <div class="nav-logo">🇮🇳</div>
+        <div class="nav-brand-text">Redress <span>AI</span></div>
+    </a>
+    <div class="nav-links">
+        <a href="/" class="nav-link active">Submit</a>
+        <a href="/track" class="nav-link">Track</a>
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-inner">
+        <div class="hero-badge">🤖 AI-Powered · Multilingual · Real-time</div>
+        <h1>Your Voice, <span>Heard & Acted Upon</span></h1>
+        <p>Submit complaints in English or Hindi. Our AI instantly classifies, prioritizes, and routes your grievance to the right government department.</p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="num">93<span>%</span></div>
+                <div class="lbl">AI Accuracy</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">5<span>+</span></div>
+                <div class="lbl">Departments</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">2<span>x</span></div>
+                <div class="lbl">Languages</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">&lt;1<span>s</span></div>
+                <div class="lbl">Response Time</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="icon">📝</div>
+            <div>
+                <h2>Submit Your Grievance</h2>
+                <p>Fill in the details below — AI will handle the rest</p>
+            </div>
+        </div>
+
+        <div class="form-body">
+            <div class="lang-note">
+                🌐 आप हिंदी या English में शिकायत लिख सकते हैं &nbsp;·&nbsp; You can write in Hindi or English
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name <span>*</span></label>
+                    <input type="text" id="name" placeholder="e.g. Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number <span>*</span></label>
+                    <input type="tel" id="phone" placeholder="e.g. 9876543210">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Your Area / Location <span>*</span></label>
+                <input type="text" id="location" placeholder="e.g. Ward 12, Arera Colony, Bhopal">
+            </div>
+
+            <div class="form-group">
+                <label>Describe Your Complaint <span>*</span></label>
+                <textarea id="complaint"
+                    placeholder="Describe your issue in detail... e.g. There is no water supply in our area since 3 days. The pipeline near Gandhi Chowk is broken."
+                    oninput="updateCharCount(this)"></textarea>
+                <div class="char-count" id="charCount">0 characters</div>
+            </div>
+
+            <button class="btn-submit" onclick="submitComplaint()">
+                🚀 Submit & Classify with AI
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Analyzing your complaint with AI...
+            </div>
+
+            <!-- RESULT -->
+            <div class="result-box" id="resultBox">
+                <div class="result-header-bar" id="resultHeader"></div>
+                <div class="result-grid" id="resultGrid"></div>
+                <div class="complaint-id-bar" id="complaintIdBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-it-works">
+        <h3>⚡ How It Works</h3>
+        <div class="steps">
+            <div class="step-item">
+                <div class="step-num">✍️</div>
+                <div class="step-text">You submit complaint</div>
+            </div>
+            <div class="step-arrow">›</div>
+            <div class="step-item">
+                <div class="step-num">🌐</div>
+                <div class="step-text">Language detected & translated</div>
+            </div>
+            <div class="step-arrow">›</div>
+            <div class="step-item">
+                <div class="step-num">🤖</div>
+                <div class="step-text">AI classifies department</div>
+            </div>
+            <div class="step-arrow">›</div>
+            <div class="step-item">
+                <div class="step-num">🚨</div>
+                <div class="step-text">Priority assigned</div>
+            </div>
+            <div class="step-arrow">›</div>
+            <div class="step-item">
+                <div class="step-num">📊</div>
+                <div class="step-text">Routed to department</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const deptIcons = {
+        'Water Supply': '💧',
+        'Electricity': '⚡',
+        'Roads': '🛣️',
+        'Sanitation': '🗑️',
+        'Public Services': '🏛️'
+    };
+
+    function updateCharCount(el) {
+        document.getElementById('charCount').textContent =
+            el.value.length + ' characters';
+    }
+
+    async function submitComplaint() {
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const location = document.getElementById('location').value.trim();
+        const complaint = document.getElementById('complaint').value.trim();
+
+        if (!name || !phone || !location || !complaint) {
+            showError('Please fill in all required fields!');
+            return;
+        }
+
+        if (complaint.length < 10) {
+            showError('Please describe your complaint in more detail.');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'flex';
+        document.getElementById('resultBox').style.display = 'none';
+        document.querySelector('.btn-submit').disabled = true;
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('phone', phone);
+        formData.append('location', location);
+        formData.append('complaint', complaint);
+
+        try {
+            const response = await fetch('/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            document.getElementById('loading').style.display = 'none';
+            document.querySelector('.btn-submit').disabled = false;
+
+            if (data.success) showSuccess(data);
+            else showError(data.error);
+
+        } catch (err) {
+            document.getElementById('loading').style.display = 'none';
+            document.querySelector('.btn-submit').disabled = false;
+            showError('Connection error. Please try again.');
+        }
+    }
+
+    function getPriorityClass(priority) {
+        if (priority.includes('CRITICAL')) return 'p-critical';
+        if (priority.includes('HIGH')) return 'p-high';
+        if (priority.includes('MEDIUM')) return 'p-medium';
+        return 'p-low';
+    }
+
+    function showSuccess(data) {
+        const box = document.getElementById('resultBox');
+        const icon = deptIcons[data.department] || '📋';
+        const urgencyText = data.urgency === 'URGENT' ? '🔴 URGENT' : '🟢 Normal';
+        const pClass = getPriorityClass(data.priority_level || '');
+
+        document.getElementById('resultHeader').innerHTML =
+            '✅ Complaint Submitted & Classified Successfully!';
+
+        document.getElementById('resultGrid').innerHTML = `
+            <div class="result-item">
+                <div class="r-label">Department</div>
+                <div class="r-value">${icon} ${data.department}</div>
+            </div>
+            <div class="result-item">
+                <div class="r-label">AI Confidence</div>
+                <div class="r-value">${data.confidence}%</div>
+            </div>
+            <div class="result-item">
+                <div class="r-label">Urgency</div>
+                <div class="r-value">${urgencyText}</div>
+            </div>
+            <div class="result-item">
+                <div class="r-label">Smart Priority</div>
+                <div class="r-value"><span class="p-badge ${pClass}">${data.priority_level}</span></div>
+            </div>
+            <div class="result-item">
+                <div class="r-label">Sentiment</div>
+                <div class="r-value">😟 ${data.sentiment_label}</div>
+            </div>
+            <div class="result-item">
+                <div class="r-label">Language</div>
+                <div class="r-value">🌐 ${data.language}</div>
+            </div>
+        `;
+
+        document.getElementById('complaintIdBar').innerHTML =
+            `Your Complaint ID: <strong>#${data.complaint_id}</strong> — Save this to track your complaint status`;
+
+        box.className = 'result-box success';
+        box.style.display = 'block';
+    }
+
+    function showError(message) {
+        const box = document.getElementById('resultBox');
+        document.getElementById('resultHeader').innerHTML = '❌ ' + message;
+        document.getElementById('resultGrid').innerHTML = '';
+        document.getElementById('complaintIdBar').innerHTML = '';
+        box.className = 'result-box error';
+        box.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
