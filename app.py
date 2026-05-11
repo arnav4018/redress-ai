@@ -19,6 +19,10 @@ app = Flask(__name__)
 # ============================================
 # LOAD AI MODEL
 # ============================================
+if not os.path.exists('model/classifier.pkl'):
+    print("🤖 Model not found. Training now...")
+    from startup import train_and_save
+    train_and_save()
 
 with open('model/classifier.pkl', 'rb') as f:
     model = pickle.load(f)
@@ -325,4 +329,5 @@ def get_stats():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
