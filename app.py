@@ -13,6 +13,7 @@ from datetime import datetime
 from translator import detect_and_translate
 from sentiment import analyze_sentiment, get_combined_priority
 from id_generator import generate_unique_id
+from departments import get_department_info, get_status_info
 
 nltk.download('stopwords', quiet=True)
 nltk.download('punkt', quiet=True)
@@ -234,6 +235,9 @@ def submit_complaint():
         conn.commit()
         conn.close()
 
+        # Get department support details
+        dept_info = get_department_info(department)
+
         return jsonify({
             'success': True,
             'complaint_id': unique_complaint_id,
@@ -244,6 +248,11 @@ def submit_complaint():
             'sentiment_label': sentiment_label,
             'priority_level': priority_level,
             'translated': translated if language == 'Hindi' else None,
+            # Department support info
+            'officer_name': dept_info['officer'],
+            'officer_designation': dept_info['designation'],
+            'customer_care': dept_info['phone'],
+            'status': 'Pending'
         })
 
     except Exception as e:
@@ -266,6 +275,9 @@ def track_complaint():
         if not g:
             return jsonify({'success': False, 'error': f'No complaint found with ID {complaint_id}'})
 
+        # Get department support details
+        dept_info = get_department_info(g[7])
+
         # Return data with new complaint_id field (complaint_id is at index 15)
         return jsonify({
             'success': True,
@@ -275,7 +287,11 @@ def track_complaint():
             'department': g[7], 'urgency': g[8],
             'confidence': g[9], 'sentiment_label': g[11],
             'priority_level': g[12], 'status': g[13],
-            'submitted_at': g[14]
+            'submitted_at': g[14],
+            # Department support info
+            'officer_name': dept_info['officer'],
+            'officer_designation': dept_info['designation'],
+            'customer_care': dept_info['phone']
         })
 
     except Exception as e:

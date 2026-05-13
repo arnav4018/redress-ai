@@ -488,6 +488,97 @@
         .p-high { background: #fff7ed; color: #c2410c; }
         .p-medium { background: #fefce8; color: #a16207; }
         .p-low { background: #f0fdf4; color: #15803d; }
+        .p-pending { background: #fff7ed; color: #c2410b; }
+
+        /* DEPARTMENT SUPPORT CARD */
+        .support-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1.5px solid #bae6fd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 0;
+        }
+
+        .support-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #bae6fd;
+        }
+
+        .dept-icon {
+            font-size: 1.4rem;
+        }
+
+        .dept-title {
+            font-weight: 700;
+            color: #0369a1;
+            font-size: 1rem;
+        }
+
+        .support-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .support-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .support-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .support-value {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .care-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #0ea5e9;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .care-btn:hover {
+            background: #0284c7;
+            transform: translateY(-1px);
+        }
+
+        .support-footer {
+            text-align: center;
+            padding-top: 12px;
+            border-top: 1px solid #bae6fd;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .support-footer strong {
+            color: #0369a1;
+        }
+
+        @media (max-width: 640px) {
+            .support-details { grid-template-columns: 1fr; }
+        }
 
         /* HOW IT WORKS */
         .how-it-works {
@@ -791,8 +882,8 @@
                 <div class="r-value"><span class="p-badge ${pClass}">${data.priority_level}</span></div>
             </div>
             <div class="result-item">
-                <div class="r-label">Sentiment</div>
-                <div class="r-value">😟 ${data.sentiment_label}</div>
+                <div class="r-label">Status</div>
+                <div class="r-value"><span class="p-badge p-pending">⏳ Pending</span></div>
             </div>
             <div class="result-item">
                 <div class="r-label">Language</div>
@@ -800,8 +891,36 @@
             </div>
         `;
 
-        document.getElementById('complaintIdBar').innerHTML =
-            `Your Tracking Code: <strong>${data.complaint_id}</strong> — Save this to track your complaint status`;
+        // Department Support Card
+        document.getElementById('complaintIdBar').innerHTML = `
+            <div class="support-card">
+                <div class="support-header">
+                    <span class="dept-icon">${icon}</span>
+                    <span class="dept-title">${data.department} Department</span>
+                </div>
+                <div class="support-details">
+                    <div class="support-item">
+                        <span class="support-label">Assigned Officer</span>
+                        <span class="support-value">${data.officer_name || 'Support Team'}</span>
+                    </div>
+                    <div class="support-item">
+                        <span class="support-label">Designation</span>
+                        <span class="support-value">${data.officer_designation || 'Customer Service'}</span>
+                    </div>
+                    <div class="support-item">
+                        <span class="support-label">Customer Care</span>
+                        <span class="support-value">
+                            <a href="tel:${data.customer_care}" class="care-btn">
+                                📞 ${data.customer_care}
+                            </a>
+                        </span>
+                    </div>
+                </div>
+                <div class="support-footer">
+                    <strong>Tracking Code:</strong> ${data.complaint_id}
+                </div>
+            </div>
+        `;
 
         box.className = 'result-box success';
         box.style.display = 'block';

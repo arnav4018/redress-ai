@@ -494,7 +494,8 @@
                         <select class="status-select"
                                 onchange="updateStatus('{{ g[15] }}', this.value)">
                             <option {% if g[13] == 'Pending' %}selected{% endif %}>Pending</option>
-                            <option {% if g[13] == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option {% if g[13] == 'In Review' %}selected{% endif %}>In Review</option>
+                            <option {% if g[13] == 'Assigned' %}selected{% endif %}>Assigned</option>
                             <option {% if g[13] == 'Resolved' %}selected{% endif %}>Resolved</option>
                         </select>
                     </td>
