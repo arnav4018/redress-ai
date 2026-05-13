@@ -1,0 +1,14 @@
+# Database
+grievances.db
+
+# Python cache
+__pycache__/
+*.pkl
+*.pyc
+.env
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db

@@ -375,8 +375,8 @@
         </div>
         <div class="search-body">
             <div class="search-row">
-                <input type="number" id="complaintId"
-                       placeholder="Enter your Complaint ID (e.g. 1, 2, 3...)">
+                <input type="text" id="complaintId"
+                       placeholder="Enter your Tracking Code (e.g. CMP-8F3K-22)">
                 <button class="btn-track" onclick="searchComplaint()">Track →</button>
             </div>
             <div class="error-box" id="errorBox"></div>
@@ -480,7 +480,7 @@
     function showResult(data) {
         document.getElementById('errorBox').style.display = 'none';
         const icon = deptIcons[data.department] || '📋';
-        document.getElementById('resultTitle').textContent = `Complaint #${data.id}`;
+        document.getElementById('resultTitle').textContent = `Complaint: ${data.complaint_id}`;
         document.getElementById('complaintText').textContent = `"${data.complaint}"`;
         document.getElementById('nameVal').textContent = data.name;
         document.getElementById('locationVal').textContent = data.location;

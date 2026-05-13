@@ -476,7 +476,7 @@
             <tbody>
                 {% for g in grievances %}
                 <tr>
-                    <td><strong>#{{ g[0] }}</strong></td>
+                    <td><strong>{{ g[15] }}</strong></td>
                     <td>{{ g[1] }}</td>
                     <td>{{ g[3] }}</td>
                     <td><div class="complaint-text" title="{{ g[4] }}">{{ g[4] }}</div></td>
@@ -492,7 +492,7 @@
                     <td>{{ g[9] }}%</td>
                     <td>
                         <select class="status-select"
-                                onchange="updateStatus({{ g[0] }}, this.value)">
+                                onchange="updateStatus('{{ g[15] }}', this.value)">
                             <option {% if g[13] == 'Pending' %}selected{% endif %}>Pending</option>
                             <option {% if g[13] == 'In Progress' %}selected{% endif %}>In Progress</option>
                             <option {% if g[13] == 'Resolved' %}selected{% endif %}>Resolved</option>
@@ -572,9 +572,9 @@
     });
 
     // UPDATE STATUS
-    async function updateStatus(id, status) {
+    async function updateStatus(complaintId, status) {
         const formData = new FormData();
-        formData.append('id', id);
+        formData.append('complaint_id', complaintId);
         formData.append('status', status);
         await fetch('/update_status', { method: 'POST', body: formData });
     }

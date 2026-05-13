@@ -1,5 +1,6 @@
 # ============================================
 # FLASK BACKEND — PRODUCTION READY
+# Refactored for Randomized Unique Complaint IDs
 # ============================================
 
 import os
@@ -11,6 +12,7 @@ from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from translator import detect_and_translate
 from sentiment import analyze_sentiment, get_combined_priority
+from id_generator import generate_unique_id
 
 nltk.download('stopwords', quiet=True)
 nltk.download('punkt', quiet=True)
@@ -42,28 +44,69 @@ print("✅ AI Model loaded!")
 def init_db():
     conn = sqlite3.connect('grievances.db')
     cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS grievances (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            phone TEXT NOT NULL,
-            location TEXT NOT NULL,
-            complaint TEXT NOT NULL,
-            translated_complaint TEXT,
-            original_language TEXT,
-            department TEXT NOT NULL,
-            urgency TEXT NOT NULL,
-            confidence REAL NOT NULL,
-            sentiment_score REAL,
-            sentiment_label TEXT,
-            priority_level TEXT,
-            status TEXT DEFAULT 'Pending',
-            submitted_at TEXT NOT NULL
-        )
-    ''')
+
+    # Check if table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='grievances'")
+    table_exists = cursor.fetchone()
+
+    if not table_exists:
+        # Create new table with complaint_id column
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS grievances (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                complaint_id TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                location TEXT NOT NULL,
+                complaint TEXT NOT NULL,
+                translated_complaint TEXT,
+                original_language TEXT,
+                department TEXT NOT NULL,
+                urgency TEXT NOT NULL,
+                confidence REAL NOT NULL,
+                sentiment_score REAL,
+                sentiment_label TEXT,
+                priority_level TEXT,
+                status TEXT DEFAULT 'Pending',
+                submitted_at TEXT NOT NULL
+            )
+        ''')
+    else:
+        # Table exists - check if complaint_id column exists
+        cursor.execute("PRAGMA table_info(grievances)")
+        columns = [col[1] for col in cursor.fetchall()]
+
+        if 'complaint_id' not in columns:
+            print("🔄 Adding complaint_id column to existing database...")
+            cursor.execute('ALTER TABLE grievances ADD COLUMN complaint_id TEXT UNIQUE')
+
+    # Add index on complaint_id for fast lookups (critical for tracking)
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_complaint_id ON grievances(complaint_id)')
+
     conn.commit()
     conn.close()
     print("✅ Database ready!")
+
+def migrate_existing_records():
+    """Migration: Add complaint_id to existing records if missing"""
+    conn = sqlite3.connect('grievances.db')
+    cursor = conn.cursor()
+
+    # Check if any records lack complaint_id
+    cursor.execute("SELECT id FROM grievances WHERE complaint_id IS NULL OR complaint_id = ''")
+    records_needing_id = cursor.fetchall()
+
+    if records_needing_id:
+        print(f"🔄 Migrating {len(records_needing_id)} existing records...")
+        for record_id in records_needing_id:
+            # Generate unique ID for existing record
+            new_id = generate_unique_id()
+            cursor.execute('UPDATE grievances SET complaint_id = ? WHERE id = ?', (new_id, record_id[0]))
+
+        conn.commit()
+        print(f"✅ Migration complete: {len(records_needing_id)} records updated")
+
+    conn.close()
 
 # ============================================
 # TEXT CLEANING
@@ -167,6 +210,9 @@ def submit_complaint():
         if len(complaint) < 5:
             return jsonify({'success': False, 'error': 'Please describe your complaint in more detail.'})
 
+        # Generate unique complaint ID before insertion
+        unique_complaint_id = generate_unique_id()
+
         (department, confidence, urgency,
          translated, language,
          sentiment_score, sentiment_label,
@@ -176,22 +222,21 @@ def submit_complaint():
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO grievances
-            (name, phone, location, complaint, translated_complaint,
+            (complaint_id, name, phone, location, complaint, translated_complaint,
              original_language, department, urgency, confidence,
              sentiment_score, sentiment_label, priority_level,
              status, submitted_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (name, phone, location, complaint, translated,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (unique_complaint_id, name, phone, location, complaint, translated,
               language, department, urgency, confidence,
               sentiment_score, sentiment_label, priority_level,
               'Pending', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
-        complaint_id = cursor.lastrowid
         conn.commit()
         conn.close()
 
         return jsonify({
             'success': True,
-            'complaint_id': complaint_id,
+            'complaint_id': unique_complaint_id,
             'department': department,
             'confidence': confidence,
             'urgency': urgency,
@@ -213,16 +258,19 @@ def track_complaint():
 
         conn = sqlite3.connect('grievances.db')
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM grievances WHERE id=?', (complaint_id,))
+        # Use the new complaint_id column with indexed lookup
+        cursor.execute('SELECT * FROM grievances WHERE complaint_id=?', (complaint_id.upper(),))
         g = cursor.fetchone()
         conn.close()
 
         if not g:
-            return jsonify({'success': False, 'error': f'No complaint found with ID #{complaint_id}'})
+            return jsonify({'success': False, 'error': f'No complaint found with ID {complaint_id}'})
 
+        # Return data with new complaint_id field (complaint_id is at index 15)
         return jsonify({
             'success': True,
-            'id': g[0], 'name': g[1], 'location': g[3],
+            'complaint_id': g[15],
+            'name': g[1], 'location': g[3],
             'complaint': g[4], 'language': g[6],
             'department': g[7], 'urgency': g[8],
             'confidence': g[9], 'sentiment_label': g[11],
@@ -235,11 +283,11 @@ def track_complaint():
 
 @app.route('/update_status', methods=['POST'])
 def update_status():
-    complaint_id = request.form.get('id')
+    complaint_id = request.form.get('complaint_id')
     new_status = request.form.get('status')
     conn = sqlite3.connect('grievances.db')
     cursor = conn.cursor()
-    cursor.execute('UPDATE grievances SET status=? WHERE id=?', (new_status, complaint_id))
+    cursor.execute('UPDATE grievances SET status=? WHERE complaint_id=?', (new_status, complaint_id))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
@@ -260,6 +308,7 @@ def get_stats():
 # ============================================
 
 init_db()
+migrate_existing_records()  # Add complaint_id to any existing records
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
